@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Restaurar el Reino Digital</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      color: #f0f0f0;
+      text-align: center;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin-top: 1rem;
+      color: #facc15;
+      text-shadow: 0 0 20px #facc15, 0 0 40px #fffbeb;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Video de fondo */
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+      filter: brightness(0.6);
+    }
+
+    /* Arsenal */
+    #arsenal {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 1rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tool {
+      font-size: 2.5rem;
+      cursor: grab;
+      padding: 0.5rem;
+      border: 2px solid #facc15;
+      border-radius: 0.75rem;
+      background: rgba(250, 204, 21, 0.1);
+      box-shadow: 0 0 10px #facc15aa;
+      transition: transform 0.2s, box-shadow 0.3s;
+      user-select: none;
+    }
+    .tool:active {
+      cursor: grabbing;
+      transform: scale(1.2);
+      box-shadow: 0 0 20px #facc15;
+    }
+
+    /* Círculo mágico */
+    #dropZone {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      margin: 2rem auto;
+      border-radius: 50%;
+      border: 4px dashed #facc15;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aaa;
+      font-size: 1.2rem;
+      overflow: hidden;
+      animation: pulse 3s infinite alternate;
+      z-index: 2;
+    }
+    @keyframes pulse {
+      from { box-shadow: 0 0 20px #facc15; }
+      to { box-shadow: 0 0 50px #fde047, 0 0 80px #facc15; }
+    }
+
+    /* Herramientas flotando */
+    .floating-tool {
+      position: absolute;
+      font-size: 2rem;
+      animation: spin 8s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg) translateX(140px) rotate(0deg); }
+      to { transform: rotate(360deg) translateX(140px) rotate(-360deg); }
+    }
+
+    /* Botón final */
+    #restoreBtn {
+      display: none;
+      margin: 1rem auto 2rem auto;
+      padding: 0.8rem 2.5rem;
+      background: linear-gradient(45deg, #facc15, #fcd34d);
+      color: #1a1a1a;
+      font-weight: bold;
+      border: none;
+      border-radius: 999px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: 0 0 20px #facc15cc, 0 0 40px #fde047aa;
+      animation: glow 2s infinite alternate;
+      z-index: 2;
+    }
+    #restoreBtn:hover {
+      background: linear-gradient(45deg, #fde047, #facc15);
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #facc15; }
+      to { text-shadow: 0 0 20px #fff, 0 0 30px #facc15; }
+    }
+
+    /* Video final */
+    #finalVideo {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+<video id="bgVideo" autoplay muted playsinline>
+  <source src="final.mp4" type="video/mp4">
+</video>
+
+<script>
+  const bgVideo = document.getElementById("bgVideo");
+
+  // Esperar la primera interacción del usuario
+  document.addEventListener("click", () => {
+    bgVideo.muted = false;  // activar sonido
+    bgVideo.play();         // forzar reproducción
+  }, { once: true });
+</script>
+
+  <h1>🔮 ¡Usa tus herramientas para restaurar el Reino Digital!</h1>
+
+  <!-- Arsenal -->
+  <div id="arsenal">
+    <div class="tool" draggable="true">🔋</div>
+    <div class="tool" draggable="true">🔧</div>
+    <div class="tool" draggable="true">💾</div>
+    <div class="tool" draggable="true">🤝</div>
+    <div class="tool" draggable="true">🧭</div>
+    <div class="tool" draggable="true">👑</div>
+  </div>
+
+  <!-- Círculo mágico -->
+  <div id="dropZone">Arrastra aquí tus poderes</div>
+
+  <!-- Botón -->
+  <button id="restoreBtn">✨ RESTAURAR EL REINO DIGITAL ✨</button>
+
+  <!-- Video final -->
+  <video id="finalVideo" controls autoplay>
+    <source src="felicidades.mp4" type="video/mp4">
+  </video>
+
+  <script>
+    const tools = document.querySelectorAll(".tool");
+    const dropZone = document.getElementById("dropZone");
+    const restoreBtn = document.getElementById("restoreBtn");
+    const finalVideo = document.getElementById("finalVideo");
+
+    let placedTools = 0;
+    const totalTools = tools.length;
+
+    tools.forEach(tool => {
+      tool.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", tool.textContent);
+      });
+    });
+
+    dropZone.addEventListener("dragover", e => {
+      e.preventDefault();
+    });
+
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      const symbol = e.dataTransfer.getData("text/plain");
+
+      // Evitar duplicados
+      if (![...dropZone.textContent].includes(symbol)) {
+        const floating = document.createElement("div");
+        floating.classList.add("floating-tool");
+        floating.textContent = symbol;
+
+        // Ángulo aleatorio
+        const angle = Math.random() * 360;
+        floating.style.transform = `rotate(${angle}deg) translateX(140px) rotate(-${angle}deg)`;
+        dropZone.appendChild(floating);
+
+        placedTools++;
+      }
+
+      if (placedTools === totalTools) {
+        dropZone.textContent = "";
+        restoreBtn.style.display = "block";
+      }
+    });
+
+    restoreBtn.addEventListener("click", () => {
+      finalVideo.style.display = "block";
+      finalVideo.play();
+    });
+  </script>
+</body>
+</html>

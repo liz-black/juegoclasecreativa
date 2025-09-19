@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Capítulo 3: El Camino de la Información - Arcanum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+        .fantasy-bg {
+            background: linear-gradient(135deg, #1f2937 0%, #4b5563 50%, #9ca3af 100%);
+            position: relative;
+        }
+
+        .fantasy-bg::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.5; }
+        }
+
+        .magical-glow {
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 40px rgba(156, 163, 175, 0.5); }
+        }
+
+        .mission-card {
+            transition: all 0.3s ease;
+        }
+
+        .mission-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .component-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .quiz-option {
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            transform: scale(1.02);
+        }
+
+        .correct {
+            background: linear-gradient(135deg, #059669, #10b981) !important;
+            animation: correctPulse 0.5s ease;
+        }
+
+        .incorrect {
+            background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .roulette-wheel {
+            animation: spin 4s ease-in-out;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(1440deg); }
+        }
+    </style>
+</head>
+<body class="fantasy-bg min-h-screen text-white font-inter">
+    <!-- Header -->
+    <header class="relative z-10 p-6">
+        <div class="flex justify-between items-center">
+            <button onclick="goHome()" class="bg-black bg-opacity-30 hover:bg-opacity-50 rounded-lg px-4 py-2 transition-all">
+                ← Volver al Mapa
+            </button>
+            <div class="text-center">
+                <h1 class="font-cinzel text-3xl font-bold magical-glow">🔍 El Camino de la Información</h1>
+                <p class="text-lg opacity-90">Capítulo 3 - Distinguiendo lo Verdadero</p>
+            </div>
+            <div class="flex gap-4">
+                <div class="bg-black bg-opacity-30 rounded-lg px-4 py-2 text-center">
+                    <div class="text-lg font-bold text-yellow-300" id="points">0</div>
+                    <div class="text-xs opacity-80">Puntos</div>
+                </div>
+                <div class="bg-black bg-opacity-30 rounded-lg px-4 py-2 text-center">
+                    <div class="text-lg font-bold text-green-300" id="toolCount">0/6</div>
+                    <div class="text-xs opacity-80">Herramientas</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ruleta del Destino -->
+    <section class="relative z-10 max-w-4xl mx-auto px-6 mb-8">
+        <div class="bg-gradient-to-br from-gray-700 to-gray-900 rounded-xl p-6 backdrop-blur-sm text-center">
+            <h2 class="font-cinzel text-2xl font-bold mb-4">🎰 Ruleta del Destino</h2>
+            <div class="flex items-center justify-center gap-6">
+                <div class="text-4xl" id="rouletteWheel">🎯</div>
+                <div>
+                    <p class="text-sm opacity-90 mb-2">Gira para obtener ayudas especiales</p>
+                    <button id="spinRouletteBtn" onclick="spinRoulette()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        🎰 Girar (10 pts)
+                    </button>
+                </div>
+                <div class="text-xs opacity-70" id="rouletteStatus">Requiere 20 puntos</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-6xl mx-auto px-6 pb-12">
+
+        <!-- Story Introduction -->
+        <section class="mb-12" id="storyIntro">
+            <div class="bg-black bg-opacity-40 rounded-xl p-8 backdrop-blur-sm text-center">
+                <div class="component-animation text-8xl mb-6">🔍</div>
+                <h2 class="font-cinzel text-4xl font-bold mb-6">¡Bienvenido al Camino de la Información!</h2>
+                <p class="text-xl leading-relaxed max-w-4xl mx-auto mb-8 opacity-90">
+                    Enfrenta el desafío final: distinguir entre información verdadera y falsa, y dominar las técnicas de búsqueda avanzada.
+                </p>
+                <div class="bg-indigo-700 bg-opacity-30 rounded-lg p-6 mb-8">
+                    <h3 class="text-2xl font-bold mb-4">🧭 MISIÓN 5: El Buscador Perdido</h3>
+                    <p class="text-lg mb-4">
+                        Encuentra la web confiable usando pistas secretas.
+                    </p>
+                    <div class="mb-4">
+                        <div class="text-yellow-300 text-lg mb-2">🎁 Recompensa:</div>
+                        <div class="flex gap-4">
+                            <span class="bg-black bg-opacity-30 rounded px-3 py-1">🧭 Brújula Digital</span>
+                            <span class="bg-black bg-opacity-30 rounded px-3 py-1">+15 puntos</span>
+                        </div>
+                    </div>
+                    <button class="mission-btn w-full bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg py-4 font-semibold text-lg transition-all" onclick="startExternalMission(5)">
+                        🚀 Ir a Misión Externa
+                    </button>
+                    <button class="enter-secret-btn mt-4 w-full bg-yellow-600 bg-opacity-30 hover:bg-opacity-40 rounded-lg py-4 font-semibold text-lg transition-all" onclick="openSecretWordModal(5)">
+                        🔑 Ingresar Palabra Secreta
+                    </button>
+                    <div class="mt-4 text-center">
+                        <span class="mission-status text-sm opacity-70" id="status5">Disponible</span>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-700 bg-opacity-30 rounded-lg p-6 mb-8">
+                    <h3 class="text-2xl font-bold mb-4">👑 MISIÓN 6: Caza de Noticias</h3>
+                    <p class="text-lg mb-4">
+                        Atrapa la noticia falsa y protege la verdad.
+                    </p>
+                    <div class="mb-4">
+                        <div class="text-yellow-300 text-lg mb-2">🎁 Recompensa:</div>
+                        <div class="flex gap-4">
+                            <span class="bg-black bg-opacity-30 rounded px-3 py-1">👑 Corona del Saber</span>
+                            <span class="bg-black bg-opacity-30 rounded px-3 py-1">Requiere Palabra Secreta</span>
+                        </div>
+                    </div>
+                    <button class="mission-btn w-full bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg py-4 font-semibold text-lg transition-all" onclick="startExternalMission(6)">
+                        🚀 Ir a Misión Externa
+                    </button>
+                    <div class="mt-4 text-center">
+                        <span class="mission-status text-sm opacity-70" id="status6">Disponible</span>
+                    </div>
+                </div>
+
+                <button onclick="startChapter()" class="bg-gradient-to-r from-indigo-700 to-emerald-700 hover:from-indigo-800 hover:to-emerald-800 px-8 py-4 rounded-lg font-bold text-xl transition-all">
+                    🔍 ¡Comenzar Aventuras en el Camino!
+                </button>
+            </div>
+        </section>
+
+        <!-- Missions Section -->
+        <section class="space-y-8" id="missionsSection" style="display: none;">
+            <h2 class="font-cinzel text-3xl font-bold text-center mb-8">🎯 Misiones del Camino de la Información</h2>
+                <!-- Video debajo del título -->
+<div class="max-w-3xl mx-auto rounded-lg overflow-hidden shadow-lg">
+    <video id="byteVideo" class="w-full h-64 object-cover rounded-lg" controls preload="auto">
+        <source src="byte.mp4" type="video/mp4">
+        Tu navegador no soporta video en HTML5.
+    </video>
+</div>
+            <!-- Mission 5 -->
+            <div class="mission-card bg-gradient-to-br from-indigo-700 to-purple-700 rounded-xl p-8 backdrop-blur-sm" id="mission5">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <h3 class="font-bold text-3xl mb-4">🧭 Misión 5: El Buscador Perdido</h3>
+                        <p class="mb-4 opacity-90 text-lg">
+                            Encuentra la web confiable usando pistas secretas.
+                        </p>
+                        <div class="mb-4 bg-black bg-opacity-30 rounded-lg p-4">
+                            <p class="text-sm mb-2"><strong>🔗 Misión Externa:</strong></p>
+                            <p class="text-sm opacity-90">Completa la actividad en el enlace externo</p>
+                            <p class="text-sm opacity-90">Al finalizar, obtendrás una palabra secreta</p>
+                        </div>
+                        <div class="mb-6">
+                            <div class="text-yellow-300 text-lg mb-2">🎁 Recompensas:</div>
+                            <div class="flex gap-4">
+                                <span class="bg-black bg-opacity-30 rounded px-3 py-1">🧭 Brújula Digital</span>
+                                <span class="bg-black bg-opacity-30 rounded px-3 py-1">+15 puntos</span>
+                            </div>
+                        </div>
+                        <button class="mission-btn w-full bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg py-4 font-semibold text-lg transition-all" onclick="startExternalMission(5)">
+                            🚀 Ir a Misión Externa
+                        </button>
+                        <button class="enter-secret-btn mt-4 w-full bg-yellow-600 bg-opacity-30 hover:bg-opacity-40 rounded-lg py-4 font-semibold text-lg transition-all" onclick="openSecretWordModal(5)">
+                            🔑 Ingresar Palabra Secreta
+                        </button>
+                        <div class="mt-4 text-center">
+                            <span class="mission-status text-sm opacity-70" id="status5">Disponible</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-8xl mb-4">🧭</div>
+                        <div class="text-3xl" id="mission5Status">⭕</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mission 6 -->
+            <div class="mission-card bg-gradient-to-br from-emerald-700 to-green-700 rounded-xl p-8 backdrop-blur-sm" id="mission6">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <h3 class="font-bold text-3xl mb-4">👑 Misión 6: Caza de Noticias</h3>
+                        <p class="mb-4 opacity-90 text-lg">
+                            Atrapa la noticia falsa y protege la verdad.
+                        </p>
+                        <div class="mb-4 bg-black bg-opacity-30 rounded-lg p-4">
+                            <p class="text-sm mb-2"><strong>🔗 Misión Externa:</strong></p>
+                            <p class="text-sm opacity-90">Acceso con palabra secreta</p>
+                        </div>
+                        <div class="mb-6">
+                            <div class="text-yellow-300 text-lg mb-2">🎁 Recompensas:</div>
+                            <div class="flex gap-4">
+                                <span class="bg-black bg-opacity-30 rounded px-3 py-1">👑 Corona del Saber</span>
+                                <span class="bg-black bg-opacity-30 rounded px-3 py-1">Acceso Libre</span>
+                            </div>
+                        </div>
+                        <button class="mission-btn w-full bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg py-4 font-semibold text-lg transition-all" onclick="startExternalMission(6)">
+                            🚀 Ir a Misión Externa
+                        </button>
+                        <button class="enter-secret-btn mt-4 w-full bg-yellow-600 bg-opacity-30 hover:bg-opacity-40 rounded-lg py-4 font-semibold text-lg transition-all" onclick="openSecretWordModal(6)">
+                        🔑 Ingresar Palabra Secreta
+                        </button>
+
+                        <div class="mt-4 text-center">
+                            <span class="mission-status text-sm opacity-70" id="status6">Disponible</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-8xl mb-4">👑</div>
+                        <div class="text-3xl" id="mission6Status">⭕</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning Content -->
+        <section class="mb-12" id="learningContent" style="display: none;">
+            <div class="bg-black bg-opacity-40 rounded-xl p-8 backdrop-blur-sm">
+                <h2 class="font-cinzel text-3xl font-bold text-center mb-8">📚 Conocimiento del Camino de la Información</h2>
+                <p class="text-center opacity-90 max-w-3xl mx-auto mb-6">
+                    Aprende a identificar fuentes confiables, técnicas de búsqueda avanzada y cómo detectar noticias falsas para proteger tu conocimiento.
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-sm max-w-3xl mx-auto">
+                    <li><strong>Fuentes confiables:</strong> Verifica la autoridad y reputación de la fuente.</li>
+                    <li><strong>Búsqueda avanzada:</strong> Usa operadores y filtros para resultados precisos.</li>
+                    <li><strong>Detección de noticias falsas:</strong> Analiza el contenido, autor y contexto.</li>
+                    <li><strong>Herramientas digitales:</strong> Utiliza verificadores y plataformas confiables.</li>
+                </ul>
+                <div class="text-center mt-8">
+                    <button onclick="backToMissions()" class="bg-gradient-to-r from-indigo-700 to-emerald-700 hover:from-indigo-800 hover:to-emerald-800 px-6 py-3 rounded-lg font-semibold transition-all">
+                        🔙 Volver a Misiones
+                    </button>
+                </div>
+            </div>
+        </section>
+
+               <!-- Chapter Complete -->
+        <section class="mt-12" id="chapterComplete" style="display: none;">
+            <div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-8 backdrop-blur-sm text-center">
+                <h2 class="font-cinzel text-4xl font-bold mb-6">🏆 ¡CAMINO DE LA INFORMACIÓN COMPLETADO!</h2>
+                <div class="text-8xl mb-6">🔍🧭👑</div>
+                <p class="text-2xl mb-4">¡Felicidades, Guardián del Saber!</p>
+                <p class="text-lg mb-6 opacity-90">Has completado todas las misiones del Capítulo 3</p>
+                <div class="bg-black bg-opacity-30 rounded-lg p-6 mb-6">
+                    <h3 class="text-xl font-bold mb-4">🎖️ Logros Desbloqueados:</h3>
+                    <div id="chapterAchievements" class="grid md:grid-cols-2 gap-4 text-sm">
+                        <div>✅ Brújula Digital</div>
+                        <div>✅ Corona del Saber</div>
+                        <div>✅ Guardián del Camino de la Información</div>
+                    </div>
+                </div>
+                <div class="bg-yellow-600 bg-opacity-30 rounded-lg p-4 mb-6">
+                    <h4 class="font-bold mb-2">🛠️ Herramientas Obtenidas:</h4>
+                    <div class="flex justify-center gap-4">
+                        <span class="text-2xl">🧭</span>
+                        <span class="text-2xl">👑</span>
+                    </div>
+                    <p class="text-sm mt-2">Brújula Digital + Corona del Saber</p>
+                </div>
+                <div class="flex justify-center gap-4">
+                    <button onclick="goHome()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-lg font-semibold transition-all">
+                        🏠 Volver al Mapa
+                    </button>
+                    <button onclick="nextChapter()" class="bg-gradient-to-r from-indigo-700 to-emerald-700 hover:from-indigo-800 hover:to-emerald-800 px-6 py-3 rounded-lg font-semibold transition-all">
+                        ➡️ Ir a lo siguiente
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Palabra Secreta -->
+    <div id="secretWordModal" style="display:none;" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-gradient-to-br from-yellow-600 to-orange-600 rounded-xl p-8 max-w-md w-full mx-4 text-center">
+            <h2 class="font-cinzel text-3xl font-bold mb-4">🔑 Palabra Secreta</h2>
+            <p class="text-lg mb-4">Ingresa la palabra obtenida en la misión actual:</p>
+            <div class="flex gap-4 justify-center mb-4">
+                <input id="secretWordInput" type="text" maxlength="20" placeholder="Palabra secreta..." class="px-4 py-3 rounded-lg bg-black bg-opacity-30 border border-white border-opacity-30 text-white placeholder-gray-400 text-center w-2/3">
+                <button onclick="validateSecretWord()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-lg font-semibold">✅</button>
+            </div>
+            <div class="flex justify-center gap-4">
+                <button onclick="closeSecretWordModal()" class="text-sm opacity-80 hover:opacity-100">❌ Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado del juego para Capítulo 3
+        let gameState = {
+            playerName: localStorage.getItem('arcanum_last_player') || '',
+            points: 0,
+            tools: [],
+            completedMissions: [],
+            currentChapter: 3,
+            rouletteUnlocked: false,
+            achievements: []
+        };
+
+        const secretWords = {
+    'CONFIAR': { mission: 5, tool: 'compass', points: 15, name: 'Brújula Digital', emoji: '🧭' },
+    'EVIDENCIA': { mission: 6, tool: 'crown', points: 15, name: 'Corona del Saber', emoji: '👑' }
+        };
+
+        // Herramientas por misión (incluye misión 6 sin palabra secreta)
+        const missionTools = {
+            5: { tool: 'compass', points: 15, name: 'Brújula Digital', emoji: '🧭' },
+            6: { tool: 'crown', points: 0, name: 'Corona del Saber', emoji: '👑' }
+        };
+
+        const roulettePrizes = [
+            { name: 'Consultar Docente', emoji: '📞', action: 'teacher' },
+            { name: 'Ayuda de Compañero', emoji: '👥', action: 'classmate' },
+            { name: '1 min en Google', emoji: '🌐', action: 'google' },
+            { name: '+10 Puntos Extra', emoji: '⭐', action: 'points' },
+            { name: 'Reintentar Misión', emoji: '🔄', action: 'retry' },
+            { name: 'Mini-reto Sorpresa', emoji: '🎭', action: 'challenge' }
+        ];
+
+        let currentMissionForSecret = null;
+
+        // Mapear misión a nombre de logro legible
+        const achievementNamesByMission = {
+            5: 'Brújula Digital',
+            6: 'Corona del Saber'
+        };
+        const chapterAchievement = 'Guardián del Camino de la Información';
+
+        // Cargar estado guardado
+        function loadGameState() {
+            let loaded = false;
+            if (gameState.playerName) {
+                const playerKey = `arcanum_player_${gameState.playerName.toLowerCase().replace(/\s+/g, '_')}`;
+                const savedData = localStorage.getItem(playerKey);
+                if (savedData) {
+                    try {
+                        const data = JSON.parse(savedData);
+                        applyLoadedData(data);
+                        loaded = true;
+                    } catch (e) { console.warn('Error parseando playerKey:', e); }
+                }
+            }
+            if (!loaded) {
+                const savedGeneral = localStorage.getItem('arcanum_ch3_state');
+                if (savedGeneral) {
+                    try {
+                        const data = JSON.parse(savedGeneral);
+                        applyLoadedData(data);
+                        loaded = true;
+                    } catch (e) { console.warn('Error parseando arcanum_ch3_state:', e); }
+                }
+            }
+            updateUI();
+        }
+
+        function applyLoadedData(data) {
+            gameState.points = data.points || 0;
+            gameState.tools = data.tools || [];
+            gameState.completedMissions = data.completedMissions || [];
+            gameState.currentChapter = data.currentChapter || 3;
+            gameState.rouletteUnlocked = data.rouletteUnlocked || false;
+            gameState.achievements = data.achievements || [];
+        }
+
+        // Guardar estado
+        function saveGameState() {
+            const dataToSave = {
+                points: gameState.points,
+                tools: gameState.tools,
+                completedMissions: gameState.completedMissions,
+                currentChapter: gameState.currentChapter,
+                rouletteUnlocked: gameState.rouletteUnlocked,
+                achievements: gameState.achievements,
+                lastSaved: new Date().toISOString()
+            };
+            localStorage.setItem('arcanum_ch3_state', JSON.stringify(dataToSave));
+            if (gameState.playerName) {
+                const playerKey = `arcanum_player_${gameState.playerName.toLowerCase().replace(/\s+/g, '_')}`;
+                localStorage.setItem(playerKey, JSON.stringify(dataToSave));
+                localStorage.setItem('arcanum_last_player', gameState.playerName);
+            }
+        }
+
+        // Actualizar UI con lógica para mostrar misión 5 primero, luego misión 6
+        function updateUI() {
+            if (gameState.completedMissions.includes(5) && gameState.completedMissions.includes(6)) {
+                // Ambas misiones completadas: mostrar capítulo completado
+                document.getElementById('storyIntro').style.display = "none";
+                document.getElementById('chapterComplete').style.display = "block";
+                document.getElementById('mission5').style.display = "none";
+                document.getElementById('mission6').style.display = "none";
+                document.getElementById('missionsSection').style.display = 'none';
+            } else if (gameState.completedMissions.includes(5)) {
+                // Misión 5 completada, mostrar Misión 6
+                document.getElementById('storyIntro').style.display = "none";
+                document.getElementById('missionsSection').style.display = "block";
+                document.getElementById('mission5').style.display = "none";
+                document.getElementById('mission6').style.display = "block";
+            } else {
+                // Misión 5 no completada, mostrar solo Misión 5
+                document.getElementById('storyIntro').style.display = "none";
+                document.getElementById('missionsSection').style.display = "block";
+                document.getElementById('mission5').style.display = "block";
+                document.getElementById('mission6').style.display = "none";
+            }
+
+            // Actualizar estados visuales de misiones
+            if (gameState.completedMissions.includes(5)) {
+                document.getElementById('mission5Status').textContent = '✅';
+                document.getElementById('status5').textContent = 'Completada';
+                document.getElementById('status5').className = 'mission-status text-sm text-green-300';
+            } else {
+                document.getElementById('mission5Status').textContent = '⭕';
+                document.getElementById('status5').textContent = 'Disponible';
+                document.getElementById('status5').className = 'mission-status text-sm opacity-70';
+            }
+
+            if (gameState.completedMissions.includes(6)) {
+                document.getElementById('mission6Status').textContent = '✅';
+                document.getElementById('status6').textContent = 'Completada';
+                document.getElementById('status6').className = 'mission-status text-sm text-green-300';
+            } else {
+                document.getElementById('mission6Status').textContent = '⭕';
+                document.getElementById('status6').textContent = 'Disponible';
+                document.getElementById('status6').className = 'mission-status text-sm opacity-70';
+            }
+
+            // Ocultar botón palabra secreta para misión 6 (no tiene)
+            // En updateUI()
+            const enterBtn5 = document.querySelector('#mission5 .enter-secret-btn');
+            if (enterBtn5) enterBtn5.style.display = gameState.completedMissions.includes(5) ? 'none' : 'block';
+
+            const enterBtn6 = document.querySelector('#mission6 .enter-secret-btn');
+            if (enterBtn6) enterBtn6.style.display = gameState.completedMissions.includes(6) ? 'none' : 'block';
+
+
+            document.getElementById('points').textContent = gameState.points;
+            document.getElementById('toolCount').textContent = `${gameState.tools.length}/6`;
+
+            updateRouletteStatus();
+        }
+
+        // Actualizar estado ruleta
+        function updateRouletteStatus() {
+            const spinBtn = document.getElementById('spinRouletteBtn');
+            const status = document.getElementById('rouletteStatus');
+
+            if (gameState.points >= 20) {
+                gameState.rouletteUnlocked = true;
+                spinBtn.disabled = gameState.points < 10;
+                status.textContent = gameState.points >= 10 ? 'Disponible' : 'Necesitas 10 puntos';
+            } else {
+                spinBtn.disabled = true;
+                status.textContent = 'Requiere 20 puntos';
+            }
+        }
+
+        // Iniciar capítulo
+        function startChapter() {
+            document.getElementById('storyIntro').style.display = 'none';
+            document.getElementById('missionsSection').style.display = 'block';
+        }
+
+        function startExternalMission(missionNum) {
+    if (missionNum === 5) {
+        showModal('Misión Externa', 'Serás redirigido a la actividad del Buscador Perdido. Al completarla, obtendrás la palabra secreta', '🚀 Ir a Misión', () => {
+            window.open('https://view.genially.com/68c9d2cf51ba273a29657a5c/interactive-content-buscador-perdido', '_blank');
+        });
+    } else if (missionNum === 6) {
+        showModal('Misión Externa', 'Serás redirigido a la Caza de Noticias. Al completarla, obtendrás la palabra secreta', '🚀 Ir a Misión', () => {
+            window.open('https://view.genially.com/68c9e13e1467882c50e26ff4/interactive-content-caza-de-noticias-atrapa-al-falso', '_blank');
+        });
+    }
+}
+
+        // Mostrar contenido educativo
+        function showLearning() {
+            document.getElementById('missionsSection').style.display = 'none';
+            document.getElementById('learningContent').style.display = 'block';
+        }
+
+        // Volver a misiones
+        function backToMissions() {
+            document.getElementById('learningContent').style.display = 'none';
+            document.getElementById('missionsSection').style.display = 'block';
+        }
+
+        // Modal palabra secreta
+        function openSecretWordModal(missionNum) {
+            currentMissionForSecret = missionNum;
+            document.getElementById('secretWordInput').value = '';
+            document.getElementById('secretWordModal').style.display = 'flex';
+        }
+
+        function closeSecretWordModal() {
+            document.getElementById('secretWordModal').style.display = 'none';
+            currentMissionForSecret = null;
+        }
+
+// Validar palabra secreta
+function validateSecretWord() {
+    const word = document.getElementById('secretWordInput').value.toUpperCase().trim();
+
+    if (!word) {
+        showModal('Palabra Vacía', 'Ingresa una palabra secreta antes de validar.', '🔄 Intentar');
+        return;
+    }
+
+    if (secretWords[word]) {
+        const wordData = secretWords[word];
+
+        if (gameState.completedMissions.includes(wordData.mission)) {
+            showModal('Palabra Ya Usada', 'Esta palabra secreta ya fue utilizada anteriormente.', '🔄 Intentar Otra');
+            return;
+        }
+
+        if (currentMissionForSecret !== wordData.mission) {
+            showModal('Palabra Incorrecta', 'Esta palabra no corresponde a la misión actual.', '🔄 Intentar Otra');
+            return;
+        }
+
+        // Completar misión
+        gameState.completedMissions.push(wordData.mission);
+        gameState.points += wordData.points;
+        if (!gameState.tools.includes(wordData.tool)) {
+            gameState.tools.push(wordData.tool);
+        }
+
+        // Añadir logro legible
+        const achName = achievementNamesByMission[wordData.mission];
+        if (achName && !gameState.achievements.includes(achName)) {
+            gameState.achievements.push(achName);
+        }
+
+        // Si completó ambas misiones 5 y 6, añadir logro capítulo
+        if (gameState.completedMissions.includes(5) && gameState.completedMissions.includes(6)) {
+            if (!gameState.achievements.includes(chapterAchievement)) {
+                gameState.achievements.push(chapterAchievement);
+            }
+        }
+
+        // Crear contenido del modal con imagen para misiones 5 y 6
+        let modalContent = document.createElement('div');
+        modalContent.style.textAlign = 'center';
+
+        // Mensaje principal
+        const message = document.createElement('p');
+        message.innerHTML = `¡Excelente! Has completado la misión y obtenido ${wordData.emoji} ${wordData.name} (+${wordData.points} puntos)`;
+        modalContent.appendChild(message);
+
+        // Imagen y texto de recompensa si es misión 5 o 6
+        if (wordData.mission === 5) {
+            const img = document.createElement('img');
+            img.src = '5.jpg';
+            img.alt = wordData.name;
+            img.style.width = '500px';
+            img.style.marginTop = '30px';
+            img.style.display = 'block';
+            img.style.marginLeft = 'auto';
+            img.style.marginRight = 'auto';
+            modalContent.appendChild(img);
+
+            const rewardText = document.createElement('p');
+            rewardText.innerHTML = '🎁 Recompensas: 🧭 Brújula Digital';
+            rewardText.style.marginTop = '10px';
+            rewardText.style.fontWeight = 'bold';
+            modalContent.appendChild(rewardText);
+
+        } else if (wordData.mission === 6) {
+            const img = document.createElement('img');
+            img.src = '6.jpg';
+            img.alt = wordData.name;
+            img.style.width = '500px';
+            img.style.marginTop = '30px';
+            img.style.display = 'block';
+            img.style.marginLeft = 'auto';
+            img.style.marginRight = 'auto';
+            modalContent.appendChild(img);
+
+            const rewardText = document.createElement('p');
+            rewardText.innerHTML = '🎁 Recompensas: 🧭 Brújula Digital';
+            rewardText.style.marginTop = '10px';
+            rewardText.style.fontWeight = 'bold';
+            modalContent.appendChild(rewardText);
+        }
+
+        // Texto de tarjeta de colección
+        const cardText = document.createElement('p');
+        cardText.innerHTML = '¡Obtuviste una tarjeta de colección!';
+        cardText.style.marginTop = '20px';
+        cardText.style.fontWeight = 'bold';
+        modalContent.appendChild(cardText);
+
+        // Mostrar modal
+        showModal('¡Misión Completada!', modalContent.outerHTML, '🎉 ¡Genial!');
+
+        // Limpiar input
+        document.getElementById('secretWordInput').value = '';
+        saveGameState();
+        updateUI();
+        closeSecretWordModal();
+
+    } else {
+        showModal('Palabra Incorrecta', 'La palabra secreta no es válida. Verifica que hayas completado correctamente la misión externa.', '🔄 Intentar Otra');
+    }
+}
+
+
+
+        // Girar ruleta
+        function spinRoulette() {
+            if (gameState.points < 10) return;
+
+            gameState.points -= 10;
+
+            const wheel = document.getElementById('rouletteWheel');
+            wheel.classList.add('roulette-wheel');
+
+            setTimeout(() => {
+                const prize = roulettePrizes[Math.floor(Math.random() * roulettePrizes.length)];
+
+                if (prize.action === 'points') {
+                    gameState.points += 10;
+                    showModal('¡Premio de la Ruleta!', `¡Has ganado ${prize.emoji} ${prize.name}!`, '🎉 ¡Genial!');
+                } else {
+                    showModal('¡Premio de la Ruleta!', `¡Has ganado ${prize.emoji} ${prize.name}! Puedes usarlo cuando lo necesites.`, '🎉 ¡Genial!');
+                }
+
+                wheel.classList.remove('roulette-wheel');
+                saveGameState();
+                updateUI();
+            }, 4000);
+        }
+
+        // Navegación
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        function nextChapter() {
+            window.location.href = 'final.html';
+        }
+
+                // Modal genérico
+        function showModal(title, message, buttonText = '✨ Continuar', callback = null) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-gradient-to-br from-indigo-800 to-emerald-800 rounded-xl p-8 max-w-md w-full mx-4 text-center">
+                    <h2 class="font-cinzel text-2xl font-bold mb-4">${title}</h2>
+                    <p class="text-lg mb-6">${message}</p>
+                    <button class="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-lg font-semibold transition-all modal-ok">
+                        ${buttonText}
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            const okBtn = modal.querySelector('.modal-ok');
+            okBtn.addEventListener('click', () => {
+                modal.remove();
+                if (typeof callback === 'function') callback();
+            });
+        }
+
+        // Inicializar
+        loadGameState();
+
+        // Botón para contenido educativo
+        document.addEventListener('DOMContentLoaded', function() {
+            const missionsSection = document.getElementById('missionsSection');
+            if (missionsSection) {
+                const learningButton = document.createElement('div');
+                learningButton.className = 'text-center mt-8';
+                learningButton.innerHTML = `
+                    <button onclick="showLearning()" class="bg-gradient-to-r from-indigo-700 to-emerald-700 hover:from-indigo-800 hover:to-emerald-800 px-6 py-3 rounded-lg font-semibold transition-all">
+                        📚 Ver Contenido Educativo
+                    </button>
+                `;
+                missionsSection.appendChild(learningButton);
+            }
+
+            if (!gameState.completedMissions || gameState.completedMissions.length === 0) {
+                document.getElementById('storyIntro').style.display = 'block';
+                document.getElementById('missionsSection').style.display = 'none';
+                document.getElementById('learningContent').style.display = 'none';
+                document.getElementById('chapterComplete').style.display = 'none';
+                document.getElementById('mission5').style.display = 'block';
+                document.getElementById('mission6').style.display = 'none';
+            } else if (gameState.completedMissions.includes(5) && !gameState.completedMissions.includes(6)) {
+                document.getElementById('storyIntro').style.display = 'none';
+                document.getElementById('missionsSection').style.display = 'block';
+                document.getElementById('mission5').style.display = 'none';
+                document.getElementById('mission6').style.display = 'block';
+            } else {
+                document.getElementById('learningContent').style.display = 'none';
+                document.getElementById('chapterComplete').style.display = 'none';
+            }
+        });
+    </script>
+
+    <!-- Footer decorativo similar a capítulos anteriores -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-gray-900 to-gray-700 text-white text-center py-2 font-inter text-sm select-none z-10">
+        © 2024 Arcanum - Capítulo 3: El Camino de la Información
+    </footer>
+</body>
+</html>
