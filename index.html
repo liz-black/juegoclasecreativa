@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcanum - El Reino Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+        
+        .fantasy-bg {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+            position: relative;
+        }
+        
+        .fantasy-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M50 50c0-13.807-11.193-25-25-25s-25 11.193-25 25 11.193 25 25 25 25-11.193 25-25zm25 0c0-13.807-11.193-25-25-25s-25 11.193-25 25 11.193 25 25 25 25-11.193 25-25z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .magical-glow {
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 40px rgba(138, 43, 226, 0.5); }
+        }
+        
+        .chapter-card {
+            transition: all 0.3s ease;
+        }
+        
+        .chapter-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="fantasy-bg min-h-screen text-white font-inter">
+    <!-- Name Registration Modal -->
+    <div id="nameModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+        <div class="bg-gradient-to-br from-purple-800 to-blue-800 rounded-xl p-8 max-w-md w-full mx-4 text-center">
+            <div class="magical-glow text-6xl mb-6">⚔️</div>
+            <h2 class="font-cinzel text-3xl font-bold mb-4">¡Bienvenido, Aventurero!</h2>
+            <p class="text-lg mb-6 opacity-90">
+                Antes de comenzar tu épica aventura en Arcanum, necesitamos conocer tu nombre para registrar tu progreso.
+            </p>
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-2">Ingresa tu nombre:</label>
+                <input type="text" id="playerName" class="w-full px-4 py-3 rounded-lg bg-black bg-opacity-30 border border-white border-opacity-30 text-white placeholder-gray-400 text-center text-lg" placeholder="Tu nombre aquí..." maxlength="20">
+            </div>
+            <button id="registerBtn" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 py-4 rounded-lg font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" onclick="registerPlayer()" disabled>
+                🚀 Comenzar Aventura
+            </button>
+            <p class="text-xs mt-4 opacity-70">Tu progreso se guardará automáticamente</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="relative z-10 p-6">
+        <div class="flex justify-between items-center">
+            <div class="text-2xl font-cinzel font-bold">⚔️ ARCANUM</div>
+            <div class="text-center">
+                <h1 class="font-cinzel text-4xl font-bold magical-glow">El Reino Digital</h1>
+            </div>
+            <div class="flex gap-4">
+                <div class="bg-black bg-opacity-30 rounded-lg px-4 py-2 text-center">
+                    <div class="text-lg font-bold text-yellow-300" id="points">0</div>
+                    <div class="text-xs opacity-80">Puntos</div>
+                </div>
+                <div class="bg-black bg-opacity-30 rounded-lg px-4 py-2 text-center">
+                    <div class="text-lg font-bold text-green-300" id="toolCount">0/6</div>
+                    <div class="text-xs opacity-80">Herramientas</div>
+                </div>
+            </div>
+        </div>
+    </header>
+  <!-- Progress Overview -->
+        <section class="mb-12">
+            <div class="bg-black bg-opacity-40 rounded-xl p-8 backdrop-blur-sm">
+                <h2 class="font-cinzel text-3xl font-bold text-center mb-6">📊 Tu Progreso Épico</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">🎯</div>
+                        <div class="text-2xl font-bold text-green-300" id="missionsCompleted">0/6</div>
+                        <div class="text-sm opacity-80">Misiones Completadas</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">🛠️</div>
+                        <div class="text-2xl font-bold text-blue-300" id="toolsCollected">0/6</div>
+                        <div class="text-sm opacity-80">Herramientas Obtenidas</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">👑</div>
+                        <div class="text-2xl font-bold text-purple-300" id="currentChapter">Capítulo 1</div>
+                        <div class="text-sm opacity-80">Progreso Actual</div>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="mt-6">
+                    <div class="flex justify-between text-sm mb-2">
+                        <span>Progreso General</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="bg-black bg-opacity-50 rounded-full h-4">
+                        <div class="progress-bar bg-gradient-to-r from-green-500 to-blue-500 h-4 rounded-full" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-6xl mx-auto px-6 pb-12">
+        
+        <!-- Hero Section -->
+<section class="text-center mb-12">
+    <div class="bg-black bg-opacity-40 rounded-xl p-8 backdrop-blur-sm relative">
+        <div class="magical-glow text-8xl mb-6">⚔️</div>
+        <h2 class="font-cinzel text-4xl font-bold mb-4">Bienvenido a Arcanum</h2>
+        <div class="mb-4">
+            <span class="text-lg opacity-80">Aventurero: </span>
+            <span class="text-xl font-bold text-yellow-300" id="playerNameDisplay">Cargando...</span>
+        </div>
+
+        <!-- Video en lugar del texto -->
+        <div class="relative max-w-3xl mx-auto rounded-lg overflow-hidden">
+            <video id="heroVideo" class="w-full h-64 object-cover rounded-lg" preload="auto">
+                <source src="inicio.mp4" type="video/mp4">
+                Tu navegador no soporta video en HTML5.
+            </video>
+
+            <!-- Botón Play/Pausa -->
+            <button id="toggleHeroBtn"
+                onclick="toggleHeroVideo()" 
+                class="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg text-sm">
+                ▶️ Reproducir
+            </button>
+        </div>
+    </div>
+</section>
+
+<script>
+function toggleHeroVideo() {
+    const video = document.getElementById("heroVideo");
+    const btn = document.getElementById("toggleHeroBtn");
+
+    if (video.paused) {
+        video.play();
+        btn.textContent = "⏸️ Pausar";
+    } else {
+        video.pause();
+        btn.textContent = "▶️ Reproducir";
+    }
+}
+</script>
+
+        <!-- Chapters -->
+        <section class="space-y-8">
+            <h2 class="font-cinzel text-3xl font-bold text-center mb-8">🗺️ Los Tres Reinos</h2>
+            
+            <!-- Chapter 1 -->
+            <div class="chapter-card bg-gradient-to-br from-red-600 to-orange-600 rounded-xl p-8 backdrop-blur-sm" data-chapter="1">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <h3 class="font-bold text-3xl mb-4">🔬 Capítulo 1: El Laboratorio Perdido</h3>
+                        <p class="mb-4 opacity-90 text-lg">Explora el misterioso laboratorio donde los virus digitales han corrompido los sistemas. Aprende sobre seguridad digital y protección de datos.</p>
+                        <div class="flex justify-between items-center mb-6">
+                            <span class="text-yellow-300 text-lg">🎁 Recompensas: 🔋 Batería + 🔧 Kit de Reparación</span>
+                            <span class="text-green-300 text-lg">2 Misiones</span>
+                        </div>
+                        <button class="chapter-btn w-full bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg py-4 font-semibold text-lg transition-all" onclick="goToChapter(1)">
+                            🚀 Entrar al Laboratorio
+                        </button>
+                        <div class="mt-4 text-center">
+                            <span class="chapter-status text-sm opacity-70">Disponible</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-8xl mb-4">🔬</div>
+                        <div class="flex justify-center gap-4">
+                            <div class="text-3xl" id="ch1m1">⭕</div>
+                            <div class="text-3xl" id="ch1m2">⭕</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter 2 -->
+            <div class="chapter-card bg-gradient-to-br from-cyan-600 to-blue-600 rounded-xl p-8 backdrop-blur-sm" data-chapter="2">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <h3 class="font-bold text-3xl mb-4">☁️ Capítulo 2: El Reino de la Nube</h3>
+                        <p class="mb-4 opacity-90 text-lg">Navega por las nubes digitales tormentosas y domina el arte del almacenamiento en la nube y la colaboración digital.</p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-yellow-300 text-lg">🎁 Recompensas: 💾 Copia de Seguridad + 🤝 Trabajo en Equipo</span>
+                            <span class="text-green-300 text-lg">2 Misiones</span>
+                        </div>
+                        <div class="mb-4 text-sm bg-black bg-opacity-30 rounded p-3" id="ch2Requirement">
+                            ⚠️ Requiere: Completar Capítulo 1
+                        </div>
+                        <button class="chapter-btn w-full bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg py-4 font-semibold text-lg transition-all" onclick="goToChapter(2)" disabled>
+                            🔒 Bloqueado
+                        </button>
+                        <div class="mt-4 text-center">
+                            <span class="chapter-status text-sm opacity-70">Bloqueado</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-8xl mb-4">☁️</div>
+                        <div class="flex justify-center gap-4">
+                            <div class="text-3xl" id="ch2m1">⭕</div>
+                            <div class="text-3xl" id="ch2m2">⭕</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter 3 -->
+            <div class="chapter-card bg-gradient-to-br from-emerald-600 to-green-600 rounded-xl p-8 backdrop-blur-sm" data-chapter="3">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <h3 class="font-bold text-3xl mb-4">🔍 Capítulo 3: El Camino de la Información</h3>
+                        <p class="mb-4 opacity-90 text-lg">Enfrenta el desafío final: distinguir entre información verdadera y falsa, y dominar las técnicas de búsqueda avanzada.</p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-yellow-300 text-lg">🎁 Recompensas: 🧭 Brújula Digital + 👑 Corona del Saber</span>
+                            <span class="text-green-300 text-lg">2 Misiones</span>
+                        </div>
+                        <div class="mb-4 text-sm bg-black bg-opacity-30 rounded p-3" id="ch3Requirement">
+                            ⚠️ Requiere: Completar Capítulo 2
+                        </div>
+                        <button class="chapter-btn w-full bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg py-4 font-semibold text-lg transition-all" onclick="goToChapter(3)" disabled>
+                            🔒 Bloqueado
+                        </button>
+                        <div class="mt-4 text-center">
+                            <span class="chapter-status text-sm opacity-70">Bloqueado</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-8xl mb-4">🔍</div>
+                        <div class="flex justify-center gap-4">
+                            <div class="text-3xl" id="ch3m1">⭕</div>
+                            <div class="text-3xl" id="ch3m2">⭕</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tools Collection -->
+        <section class="mt-12">
+            <div class="bg-black bg-opacity-40 rounded-xl p-8 backdrop-blur-sm">
+                <h2 class="font-cinzel text-3xl font-bold text-center mb-6">🛠️ Arsenal del Guardián Digital</h2>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+                    <div class="tool-slot bg-black bg-opacity-30 rounded-lg p-4 text-center" data-tool="battery">
+                        <div class="text-4xl mb-2" id="tool-battery">❓</div>
+                        <div class="text-xs">Batería</div>
+                    </div>
+                    <div class="tool-slot bg-black bg-opacity-30 rounded-lg p-4 text-center" data-tool="repair">
+                        <div class="text-4xl mb-2" id="tool-repair">❓</div>
+                        <div class="text-xs">Reparación</div>
+                    </div>
+                    <div class="tool-slot bg-black bg-opacity-30 rounded-lg p-4 text-center" data-tool="backup">
+                        <div class="text-4xl mb-2" id="tool-backup">❓</div>
+                        <div class="text-xs">Respaldo</div>
+                    </div>
+                    <div class="tool-slot bg-black bg-opacity-30 rounded-lg p-4 text-center" data-tool="teamwork">
+                        <div class="text-4xl mb-2" id="tool-teamwork">❓</div>
+                        <div class="text-xs">Equipo</div>
+                    </div>
+                    <div class="tool-slot bg-black bg-opacity-30 rounded-lg p-4 text-center" data-tool="compass">
+                        <div class="text-4xl mb-2" id="tool-compass">❓</div>
+                        <div class="text-xs">Brújula</div>
+                    </div>
+                    <div class="tool-slot bg-black bg-opacity-30 rounded-lg p-4 text-center" data-tool="crown">
+                        <div class="text-4xl mb-2" id="tool-crown">❓</div>
+                        <div class="text-xs">Corona</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Game Complete -->
+        <section class="mt-12" id="gameComplete" style="display: none;">
+            <div class="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-xl p-8 backdrop-blur-sm text-center">
+                <h2 class="font-cinzel text-4xl font-bold mb-6">🏆 ¡ARCANUM RESTAURADO!</h2>
+                <div class="text-8xl mb-6">👑⚔️👑</div>
+                <p class="text-2xl mb-4">¡Felicidades, <span id="winnerName">Guardián</span>!</p>
+                <p class="text-lg mb-6 opacity-90">Has completado todas las misiones y restaurado el Reino Digital</p>
+                <div class="bg-black bg-opacity-30 rounded-lg p-4 mb-6">
+                    <p class="text-lg font-bold">🎖️ Logros Desbloqueados:</p>
+                    <p class="text-sm mt-2">✅ Maestro de la Seguridad Digital</p>
+                    <p class="text-sm">✅ Experto en Colaboración en la Nube</p>
+                    <p class="text-sm">✅ Guardián de la Información Veraz</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Game State Management
+        let gameState = {
+            playerName: '',
+            points: 0,
+            tools: [],
+            completedMissions: [],
+            currentChapter: 1
+        };
+
+        const toolEmojis = {
+            battery: '🔋',
+            repair: '🔧',
+            backup: '💾',
+            teamwork: '🤝',
+            compass: '🧭',
+            crown: '👑'
+        };
+
+        // Load player data by name
+        function loadPlayerData(playerName) {
+            const playerKey = `arcanum_player_${playerName.toLowerCase().replace(/\s+/g, '_')}`;
+            const savedData = localStorage.getItem(playerKey);
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                gameState = {
+                    playerName: playerName,
+                    points: data.points || 0,
+                    tools: data.tools || [],
+                    completedMissions: data.completedMissions || [],
+                    currentChapter: data.currentChapter || 1
+                };
+                return true; // Existing player
+            } else {
+                gameState = {
+                    playerName: playerName,
+                    points: 0,
+                    tools: [],
+                    completedMissions: [],
+                    currentChapter: 1
+                };
+                return false; // New player
+            }
+        }
+
+        // Save game state by player name
+        function saveGameState() {
+            if (!gameState.playerName) return;
+            
+            const playerKey = `arcanum_player_${gameState.playerName.toLowerCase().replace(/\s+/g, '_')}`;
+            const dataToSave = {
+                points: gameState.points,
+                tools: gameState.tools,
+                completedMissions: gameState.completedMissions,
+                currentChapter: gameState.currentChapter,
+                lastPlayed: new Date().toISOString()
+            };
+            
+            localStorage.setItem(playerKey, JSON.stringify(dataToSave));
+            localStorage.setItem('arcanum_last_player', gameState.playerName);
+        }
+
+        // Check if player is registered
+        function checkRegistration() {
+            const lastPlayer = localStorage.getItem('arcanum_last_player');
+            
+            // If there's a last player, try to load their data
+            if (lastPlayer) {
+                document.getElementById('playerName').value = lastPlayer;
+                document.getElementById('registerBtn').disabled = false;
+                document.getElementById('registerBtn').textContent = '🚀 Continuar Partida';
+            }
+            
+            document.getElementById('nameModal').style.display = 'flex';
+            
+            // Enable register button when name is entered
+            document.getElementById('playerName').addEventListener('input', function() {
+                const name = this.value.trim();
+                const registerBtn = document.getElementById('registerBtn');
+                registerBtn.disabled = name.length < 2;
+                
+                // Check if player exists
+                if (name.length >= 2) {
+                    const playerKey = `arcanum_player_${name.toLowerCase().replace(/\s+/g, '_')}`;
+                    const exists = localStorage.getItem(playerKey);
+                    registerBtn.textContent = exists ? '🚀 Continuar Partida' : '🚀 Comenzar Aventura';
+                }
+            });
+            
+            // Allow Enter key to register
+            document.getElementById('playerName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && this.value.trim().length >= 2) {
+                    registerPlayer();
+                }
+            });
+        }
+
+        // Register player
+        function registerPlayer() {
+            const name = document.getElementById('playerName').value.trim();
+            if (name.length < 2) return;
+            
+            const isExistingPlayer = loadPlayerData(name);
+            
+            document.getElementById('nameModal').style.display = 'none';
+            
+            if (isExistingPlayer) {
+                showWelcomeBackMessage(name);
+            } else {
+                showWelcomeMessage(name);
+            }
+            
+            saveGameState();
+            initGame();
+        }
+
+        // Show welcome message for new players
+        function showWelcomeMessage(name) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-gradient-to-br from-purple-800 to-blue-800 rounded-xl p-8 max-w-md w-full mx-4 text-center">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h2 class="font-cinzel text-2xl font-bold mb-4">¡Bienvenido, ${name}!</h2>
+                    <p class="text-lg mb-6">Tu aventura en Arcanum está a punto de comenzar. ¡Prepárate para convertirte en el Guardián Digital supremo!</p>
+                    <button class="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-lg font-semibold transition-all" onclick="this.parentElement.parentElement.remove()">
+                        ⚔️ ¡Comenzar Aventura!
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Show welcome back message for returning players
+        function showWelcomeBackMessage(name) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-gradient-to-br from-green-800 to-emerald-800 rounded-xl p-8 max-w-md w-full mx-4 text-center">
+                    <div class="text-6xl mb-4">🎮</div>
+                    <h2 class="font-cinzel text-2xl font-bold mb-4">¡Bienvenido de vuelta, ${name}!</h2>
+                    <p class="text-lg mb-4">Tu progreso ha sido restaurado:</p>
+                    <div class="bg-black bg-opacity-30 rounded-lg p-4 mb-6">
+                        <p class="text-sm mb-2">🎯 Misiones: ${gameState.completedMissions.length}/6</p>
+                        <p class="text-sm mb-2">🛠️ Herramientas: ${gameState.tools.length}/6</p>
+                        <p class="text-sm">⭐ Puntos: ${gameState.points}</p>
+                    </div>
+                    <button class="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-lg font-semibold transition-all" onclick="this.parentElement.parentElement.remove()">
+                        ⚔️ ¡Continuar Aventura!
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Initialize game
+        function initGame() {
+            updateUI();
+            checkGameComplete();
+        }
+
+        // Update UI elements
+        function updateUI() {
+            // Update player name
+            document.getElementById('playerNameDisplay').textContent = gameState.playerName;
+            
+            // Update stats
+            document.getElementById('points').textContent = gameState.points;
+            document.getElementById('toolCount').textContent = `${gameState.tools.length}/6`;
+            document.getElementById('missionsCompleted').textContent = `${gameState.completedMissions.length}/6`;
+            document.getElementById('toolsCollected').textContent = `${gameState.tools.length}/6`;
+            
+            // Update current chapter display
+            let chapterText = 'Capítulo 1';
+            if (gameState.completedMissions.includes(2)) chapterText = 'Capítulo 2';
+            if (gameState.completedMissions.includes(4)) chapterText = 'Capítulo 3';
+            if (gameState.completedMissions.includes(6)) chapterText = 'Completado';
+            document.getElementById('currentChapter').textContent = chapterText;
+
+            // Update progress bar
+            const progress = (gameState.completedMissions.length / 6) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressPercent').textContent = `${Math.round(progress)}%`;
+
+            // Update mission status indicators
+            document.getElementById('ch1m1').textContent = gameState.completedMissions.includes(1) ? '✅' : '⭕';
+            document.getElementById('ch1m2').textContent = gameState.completedMissions.includes(2) ? '✅' : '⭕';
+            document.getElementById('ch2m1').textContent = gameState.completedMissions.includes(3) ? '✅' : '⭕';
+            document.getElementById('ch2m2').textContent = gameState.completedMissions.includes(4) ? '✅' : '⭕';
+            document.getElementById('ch3m1').textContent = gameState.completedMissions.includes(5) ? '✅' : '⭕';
+            document.getElementById('ch3m2').textContent = gameState.completedMissions.includes(6) ? '✅' : '⭕';
+
+            // Update chapter availability
+            updateChapterAvailability();
+
+            // Update tools display
+            updateToolsDisplay();
+
+            // 🔓 Mantener visible misión 2 si ya se completó la 1
+            if (gameState.completedMissions.includes(1)) {
+                const mission2 = document.getElementById('ch1m2');
+                if (mission2) {
+                    mission2.style.visibility = "visible";
+                }
+            }
+        }
+
+
+        // Update chapter availability
+        function updateChapterAvailability() {
+            const chapters = document.querySelectorAll('.chapter-card');
+            
+            chapters.forEach(card => {
+                const chapterNum = parseInt(card.dataset.chapter);
+                const button = card.querySelector('.chapter-btn');
+                const status = card.querySelector('.chapter-status');
+                
+                if (chapterNum === 1) {
+                    // Chapter 1 always available
+                    button.disabled = false;
+                    button.textContent = '🚀 Entrar al Laboratorio';
+                    status.textContent = 'Disponible';
+                    status.className = 'chapter-status text-sm text-green-300';
+                } else if (chapterNum === 2) {
+                    const canAccess = gameState.completedMissions.includes(2);
+                    button.disabled = !canAccess;
+                    button.textContent = canAccess ? '🚀 Entrar al Reino' : '🔒 Bloqueado';
+                    status.textContent = canAccess ? 'Disponible' : 'Bloqueado';
+                    status.className = `chapter-status text-sm ${canAccess ? 'text-green-300' : 'opacity-70'}`;
+                } else if (chapterNum === 3) {
+                    const canAccess = gameState.completedMissions.includes(4);
+                    button.disabled = !canAccess;
+                    button.textContent = canAccess ? '🚀 Entrar al Camino' : '🔒 Bloqueado';
+                    status.textContent = canAccess ? 'Disponible' : 'Bloqueado';
+                    status.className = `chapter-status text-sm ${canAccess ? 'text-green-300' : 'opacity-70'}`;
+                }
+            });
+        }
+
+        // Update tools display
+        function updateToolsDisplay() {
+            Object.keys(toolEmojis).forEach(tool => {
+                const element = document.getElementById(`tool-${tool}`);
+                if (gameState.tools.includes(tool)) {
+                    element.textContent = toolEmojis[tool];
+                    element.parentElement.classList.add('bg-green-600', 'bg-opacity-30');
+                } else {
+                    element.textContent = '❓';
+                    element.parentElement.classList.remove('bg-green-600', 'bg-opacity-30');
+                }
+            });
+        }
+
+        // Check if game is complete
+        function checkGameComplete() {
+            if (gameState.tools.length === 6) {
+                document.getElementById('gameComplete').style.display = 'block';
+                document.getElementById('winnerName').textContent = gameState.playerName;
+            }
+        }
+
+        // Go to chapter
+        function goToChapter(chapterNum) {
+            if (chapterNum === 1) {
+                window.location.href = 'capitulo1.html';
+            } else if (chapterNum === 2 && gameState.completedMissions.includes(2)) {
+                window.location.href = 'capitulo2.html';
+            } else if (chapterNum === 3 && gameState.completedMissions.includes(4)) {
+                window.location.href = 'capitulo3.html';
+            }
+        }
+
+        // Initialize on load
+        checkRegistration();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'980a4f84d3c8b4e0',t:'MTc1ODEzMDAwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
